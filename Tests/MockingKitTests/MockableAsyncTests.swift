@@ -201,6 +201,39 @@ class MockableAsyncTests: XCTestCase {
         XCTAssertEqual(calls[2].arguments.1, 789)
     }
 
+    func testCallingThrowingFunctionWithVoidResultRegistersCalls() async {
+        mock.registerError(for: \.functionThatThrowsWithVoidResultRef, error: NSError(domain: "test", code: 123))
+
+        try? await mock.functionThatThrowsWithVoidResult(arg1: "abc", arg2: 123)
+
+        let calls = mock.calls(to: \.functionThatThrowsWithVoidResultRef)
+
+        XCTAssertEqual(calls.count, 1)
+        XCTAssertEqual(calls[0].arguments.0, "abc")
+        XCTAssertEqual(calls[0].arguments.1, 123)
+    }
+
+    func testCallingThrowingFunctionWithVoidResultThrowRegisteredError() async {
+        mock.registerError(for: \.functionThatThrowsWithVoidResultRef, error: NSError(domain: "test", code: 123))
+
+        do {
+            try await mock.functionThatThrowsWithVoidResult(arg1: "abc", arg2: 123)
+        } catch {
+            XCTAssertEqual((error as NSError).domain, "test")
+            XCTAssertEqual((error as NSError).code, 123)
+        }
+    }
+
+    func testCallingThrowingFunctionWithIntResultFallbackReturnsThrowsIfErrorIsRegistered() async {
+        mock.registerError(for: \.functionThatThrowsWithIntResultRef, error: NSError(domain: "test", code: 456))
+        do {
+            _ = try await mock.call(mock.functionThatThrowsWithIntResultRef, args: ("abc", 123), fallback: 123)
+        } catch {
+            XCTAssertEqual((error as NSError).domain, "test")
+            XCTAssertEqual((error as NSError).code, 456)
+        }
+    }
+
     func testInspectingCallsRegistersAllCalls() async {
         await mock.functionWithVoidResult(arg1: "abc", arg2: 123)
         await mock.functionWithVoidResult(arg1: "abc", arg2: 456)
@@ -289,6 +322,8 @@ private final class TestClass: AsyncTestProtocol, Mockable, @unchecked Sendable 
     lazy var functionWithOptionalStructResultRef = AsyncMockReference(functionWithOptionalStructResult)
     lazy var functionWithOptionalClassResultRef = AsyncMockReference(functionWithOptionalClassResult)
     lazy var functionWithVoidResultRef = AsyncMockReference(functionWithVoidResult)
+    lazy var functionThatThrowsWithVoidResultRef = AsyncThrowingMockReference(functionThatThrowsWithVoidResult)
+    lazy var functionThatThrowsWithIntResultRef = AsyncThrowingMockReference(functionThatThrowsWithIntResult)
 
     func functionWithIntResult(arg1: String, arg2: Int) async -> Int {
         await call(functionWithIntResultRef, args: (arg1, arg2))
@@ -324,5 +359,13 @@ private final class TestClass: AsyncTestProtocol, Mockable, @unchecked Sendable 
 
     func functionWithVoidResult(arg1: String, arg2: Int) async {
         await call(functionWithVoidResultRef, args: (arg1, arg2))
+    }
+
+    func functionThatThrowsWithVoidResult(arg1: String, arg2: Int) async throws {
+        try await call(functionThatThrowsWithVoidResultRef, args: (arg1, arg2))
+    }
+
+    func functionThatThrowsWithIntResult(arg1: String, arg2: Int) async throws -> Int{
+        try await call(functionThatThrowsWithIntResultRef, args: (arg1, arg2))
     }
 }

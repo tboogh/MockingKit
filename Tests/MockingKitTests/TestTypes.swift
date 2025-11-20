@@ -21,8 +21,6 @@ protocol TestProtocol {
     func functionWithOptionalClassResult(arg1: String, arg2: Int) -> Thing?
     
     func functionWithVoidResult(arg1: String, arg2: Int)
-    
-    func asyncFunction(arg1: String, completion: @escaping (Error?) -> Void)
 }
 
 protocol AsyncTestProtocol {

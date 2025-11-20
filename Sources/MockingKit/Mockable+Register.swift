@@ -57,4 +57,110 @@ public extension Mockable {
     ) {
         registerResult(for: self[keyPath: refKeyPath], result: result)
     }
+
+    /// Register a result value for a throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - ref: The mock reference to register a result for.
+    ///   - result: What to return when the function is called.
+    func registerResult<Arguments, Result>(
+        for ref: ThrowingMockReference<Arguments, Result>,
+        result: @escaping (Arguments) throws -> Result
+    ) {
+        mock.registeredResults[ref.id] = result
+    }
+
+    /// Register a result value for a throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - refKeyPath: A key path to the mock reference to register a result for.
+    ///   - result: What to return when the function is called.
+    func registerResult<Arguments, Result>(
+        for refKeyPath: KeyPath<Self, ThrowingMockReference<Arguments, Result>>,
+        result: @escaping (Arguments) throws -> Result
+    ) {
+        registerResult(for: self[keyPath: refKeyPath], result: result)
+    }
+
+    /// Register a result value for an async throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - ref: The mock reference to register a result for.
+    ///   - result: What to return when the function is called.
+    func registerResult<Arguments, Result>(
+        for ref: AsyncThrowingMockReference<Arguments, Result>,
+        result: @escaping (Arguments) async throws -> Result
+    ) {
+        mock.registeredResults[ref.id] = result
+    }
+
+    /// Register a result value for an async throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - refKeyPath: A key path to the mock reference to register a result for.
+    ///   - result: What to return when the function is called.
+    func registerResult<Arguments, Result>(
+        for refKeyPath: KeyPath<Self, AsyncThrowingMockReference<Arguments, Result>>,
+        result: @escaping (Arguments) async throws -> Result
+    ) {
+        registerResult(for: self[keyPath: refKeyPath], result: result)
+    }
+
+    /// Register an error to be thrown for a throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - ref: The mock reference to register an error for.
+    ///   - error: The error to throw when the function is called.
+    func registerError<Arguments, Result>(
+        for ref: ThrowingMockReference<Arguments, Result>,
+        error: Error
+    ) {
+        mock.registeredCallsLock.withLock {
+            mock.registeredResults[ref.id] = { (_: Arguments) throws -> Result in
+                throw error
+            }
+            mock.registeredErrors[ref.id] = error
+        }
+    }
+
+    /// Register an error to be thrown for a throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - refKeyPath: A key path to the mock reference to register an error for.
+    ///   - error: The error to throw when the function is called.
+    func registerError<Arguments, Result>(
+        for refKeyPath: KeyPath<Self, ThrowingMockReference<Arguments, Result>>,
+        error: Error
+    ) {
+        registerError(for: self[keyPath: refKeyPath], error: error)
+    }
+
+    /// Register an error to be thrown for an async throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - ref: The mock reference to register an error for.
+    ///   - error: The error to throw when the function is called.
+    func registerError<Arguments, Result>(
+        for ref: AsyncThrowingMockReference<Arguments, Result>,
+        error: Error
+    ) {
+        mock.registeredCallsLock.withLock {
+            mock.registeredResults[ref.id] = { (_: Arguments) async throws -> Result in
+                throw error
+            }
+            mock.registeredErrors[ref.id] = error
+        }
+    }
+
+    /// Register an error to be thrown for an async throwing mock reference.
+    ///
+    /// - Parameters:
+    ///   - refKeyPath: A key path to the mock reference to register an error for.
+    ///   - error: The error to throw when the function is called.
+    func registerError<Arguments, Result>(
+        for refKeyPath: KeyPath<Self, AsyncThrowingMockReference<Arguments, Result>>,
+        error: Error
+    ) {
+        registerError(for: self[keyPath: refKeyPath], error: error)
+    }
 }
