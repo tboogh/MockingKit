@@ -14,6 +14,10 @@ let package = Package(
     products: [
         .library(
             name: "MockingKit",
+            targets: ["MockingKit"]
+        ),
+        .library(
+            name: "MockingKit-Dynamic",
             type: .dynamic,
             targets: ["MockingKit"]
         )
