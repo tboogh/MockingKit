@@ -12,7 +12,11 @@ public extension Mockable {
 
     /// Reset all registered calls.
     func resetCalls() {
-        mock.registeredCalls = [:]
+        updateRegistrations {
+            let calls = mock.registeredCalls
+            mock.registeredCalls = [:]
+            return calls
+        }
     }
 
     /// Reset all registered calls for a mock reference.
@@ -22,7 +26,9 @@ public extension Mockable {
     func resetCalls<Arguments, Result>(
         to ref: MockReference<Arguments, Result>
     ) {
-        mock.registeredCalls[ref.id] = []
+        updateRegistrations {
+            mock.registeredCalls.updateValue([], forKey: ref.id)
+        }
     }
 
     /// Reset all registered calls for a mock reference.
@@ -42,7 +48,9 @@ public extension Mockable {
     func resetCalls<Arguments, Result>(
         to ref: AsyncMockReference<Arguments, Result>
     ) {
-        mock.registeredCalls[ref.id] = []
+        updateRegistrations {
+            mock.registeredCalls.updateValue([], forKey: ref.id)
+        }
     }
 
     /// Reset all registered calls for a mock reference.
@@ -62,7 +70,9 @@ public extension Mockable {
     func resetCalls<Arguments, Result>(
         to ref: ThrowingMockReference<Arguments, Result>
     ) {
-        mock.registeredCalls[ref.id] = []
+        updateRegistrations {
+            mock.registeredCalls.updateValue([], forKey: ref.id)
+        }
     }
 
     /// Reset all registered calls for a throwing mock reference.
@@ -82,7 +92,9 @@ public extension Mockable {
     func resetCalls<Arguments, Result>(
         to ref: AsyncThrowingMockReference<Arguments, Result>
     ) {
-        mock.registeredCalls[ref.id] = []
+        updateRegistrations {
+            mock.registeredCalls.updateValue([], forKey: ref.id)
+        }
     }
 
     /// Reset all registered calls for an async throwing mock reference.
